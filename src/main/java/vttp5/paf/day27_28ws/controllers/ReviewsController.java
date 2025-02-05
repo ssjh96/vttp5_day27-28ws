@@ -14,6 +14,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+
 
 
 
@@ -61,7 +64,21 @@ public class ReviewsController
         }
 
         return ResponseEntity.ok(jResult.toString());
-
     }
+
+    
+    @GetMapping(path = "/review/{review_id}", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<String> getLatestReview(@PathVariable ("review_id") String reviewId) {
+        
+        JsonObject jResult = reviewService.getLatestComment(reviewId);
+
+        if (jResult.containsKey("error"))
+        {
+            return ResponseEntity.badRequest().body(jResult.toString());
+        }
+
+        return ResponseEntity.ok(jResult.toString());
+    }
+    
     
 }

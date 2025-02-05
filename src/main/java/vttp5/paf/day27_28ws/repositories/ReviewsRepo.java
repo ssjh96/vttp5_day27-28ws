@@ -39,7 +39,7 @@ public class ReviewsRepo {
         return result;
     }
 
-    // db.reviews2.find({_id: ObjectId(<reviewId>)})
+    // db.reviews2.find({_id: ObjectId(<reviewId>)})                also used for getting latestComment Json (part c, getmapping)
     public Optional<Document> findReviewById (String reviewId)
     {
         ObjectId reviewObjectId = new ObjectId(reviewId);
@@ -76,7 +76,7 @@ public class ReviewsRepo {
         UpdateResult updateResult = template.updateFirst(query, updateOps, Document.class, C_Reviews); // find the objectId, send the 
         // updateFirst > Updates only the first matching document (best for updating single records by _id).
         // updateMulti > Updates all matching documents (useful for batch updates, but not needed here since _id is unique).
-        
+
         return updateResult.getModifiedCount();
     }
 

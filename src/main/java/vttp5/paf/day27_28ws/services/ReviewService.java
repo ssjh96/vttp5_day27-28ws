@@ -147,4 +147,60 @@ public class ReviewService
             
         return jSuccess;
     }
+
+    
+
+    public JsonObject getLatestComment (String reviewId)
+    {
+        // Search for review by given review oid
+        Optional<Document> optReviewDoc = reviewsRepo.findReviewById(reviewId);
+        if (optReviewDoc.isEmpty())
+        {
+            JsonObject jError = Json.createObjectBuilder()
+                                    .add("error", "No review found for oid: %s".formatted(reviewId))
+                                    .build();
+            
+            return jError;
+        }
+
+        Document reviewDoc = optReviewDoc.get();
+        System.out.println(">>>>> Latest: " + reviewDoc);
+
+        // {
+        //     user: <name form field>,
+        //     rating: <latest rating>,
+        //     comment: <latest comment>,
+        //     ID: <game id form field>,
+        //     posted: <date>,
+        //     name: <The board game’s name as per ID>,
+        //     edited: <true or false depending on edits>,
+        //     timestamp: <result timestamp>
+        // }
+
+        // Extract attributes from review Doc
+        String user = reviewDoc.getString("user");
+        Double rating = reviewDoc.getDouble("rating");
+        String comment = reviewDoc.getString("comment");
+        int ID = reviewDoc.getInteger("ID");
+        String posted = reviewDoc.getString("posted");
+        String name = reviewDoc.getString("name");
+        // List<Document> editedList = reviewDoc.getList("edited", Document.class); // this is to get List<Documents since edited is an array of bson objects
+        // it allows iteration over the list or get specific elements, e.g. Document lastestEdit = editedList.get(editedList.size() - 1); // last element
+        Boolean edited = reviewDoc.containsKey("edited");
+        String timestamp = LocalDateTime.now().toString();
+
+        // Create jsonResult
+        JsonObject jResult = Json.createObjectBuilder()
+                                .add("user", user)
+                                .add("rating", rating)
+                                .add("comment", comment)
+                                .add("ID", ID)
+                                .add("posted", posted)
+                                .add("name", name)
+                                .add("edited", edited)
+                                .add("timestamp", timestamp)
+                                .build();
+
+        return jResult;
+    }
 }
