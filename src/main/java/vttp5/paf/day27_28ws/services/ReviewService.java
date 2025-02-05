@@ -320,7 +320,7 @@ public class ReviewService
         System.out.println(">>>>> Latest: " + reviewDoc);
 
         // Remove "_id" to match expected JSON format
-        reviewDoc.remove("_id");
+        reviewDoc.remove("_id"); // .remove() returns an object, {"_id" : 123}, which is the removedValue object and reviewDoc returns without "_id"
         System.out.println(">>>>> After reviewDoc remove _id: " + reviewDoc);
 
         // Check if the review was edited then return the result
@@ -345,4 +345,131 @@ public class ReviewService
 
         return jResult;
     }
+
+    // Extra info
+    // If you want _id to appear as a plain string, manually convert it before calling .toJson():
+    // Convert ObjectId to String before converting to JSON
+    // reviewDoc.put("_id", reviewDoc.getObjectId("_id").toHexString());
+
+
+
+    // part a
+    // db.getCollection("games").aggregate([
+    //     // match the game gid -> finds game with gid: 1
+    //     { $match: { gid: 1 } }, 
+    //     // join 'reviews2' with 'games' collection to get all related reviews
+    //     { $lookup: { from: 'reviews2', localField: 'gid', foreignField: 'ID', as:'reviews'} },
+    //     // flatten the review array, converts reviews array into individual docs for averaging
+    //     { $unwind: '$reviews' },
+    //     // compute average rating using $group, group by gid
+    //     { $group: {
+    //         _id: 'gid', 
+    //         name: { $first: '$name' }, 
+    //         year: { $first: '$year' }, 
+    //         rank: { $first: '$ranking' }, 
+    //         average: { $avg: '$reviews.rating'},
+    //         users_rated: { $first: '$users.rated'},
+    //         url: { $first: '$url' },
+    //         thumbnail: { $first: '$image' },
+    //         // use toString to convert review objectId to hexstring id for $concat
+    //         reviews: {$push: { $concat:['/review/', { $toString: '$reviews._id' } ] } },
+    //         } 
+    //     },
+    //     // reconstruct the data with $project
+    //     { $project: {
+    //         _id: 0,
+    //         // if all below omit, and just exclude _id with _id: 0, all other fields will actually show
+    //         name: 1,
+    //         year: 1,
+    //         rank: 1,
+    //         average: 1,
+    //         users_rated: 1,
+    //         url: 1,
+    //         thumbnail: 1,
+    //         reviews: 1,
+    //         // Added timestamp (maybe add with java code)
+    //         timestamp: {$dateToString: { format: "%Y-%m-%dT%H:%M:%S", date: new Date() } }
+    //         }
+    //     }   
+    // ])
+
+    // // part b
+    // db.getCollection("reviews2").aggregate([
+    //     // Sort reviews by rating in dsc order (highest first)
+    //     { $sort: {rating: -1} },
+    //     // join with 'games' collection
+    //     { $lookup: { from: 'games', localField: 'ID', foreignField: 'gid', as: 'games' } },
+    //     // flatten the 'games' array (Since each review only got 1 matching game)
+    //     { $unwind: '$games'},
+    //     // group by 'ID' and keep only the highest rating (prevents duplicate highest ratings)
+    //     { $group: { 
+    //         _id: '$ID',
+    //         name: { $first: '$name' }, 
+    //         rating: { $first: '$rating' }, 
+    //         user: { $first: '$user' }, 
+    //         comment: { $first: '$comment' },
+    //         review_id: { $first: '$_id'}
+    //         } 
+    //     }  
+    // ])
+
+    // db.getCollection("reviews2").aggregate([
+    //     // Sort reviews by rating in dsc order (highest first)
+    //     { $sort: {rating: -1} },
+    //     // join with 'games' collection
+    //     { $lookup: { from: 'games', localField: 'ID', foreignField: 'gid', as: 'games' } },
+    //     // flatten the 'games' array (Since each review only got 1 matching game)
+    //     { $unwind: '$games'},
+    //     // group by 'ID' and keep only the highest rating (prevents duplicate highest ratings)
+    //     { $group: { 
+    //         _id: '$ID',
+    //         name: { $first: '$name' }, 
+    //         rating: { $first: '$rating' }, 
+    //         user: { $first: '$user' }, 
+    //         comment: { $first: '$comment' },
+    //         review_id: { $first: '$_id'}
+    //         } 
+    //     },
+    //     // Group all selected games into a single array
+    //     // group requires _id to be set
+    //     // _id: null since we dont need a group identifier
+    //     { $group: {
+    //         _id: null, // no grouping key, just collect all results
+    //         games: {$push: '$$ROOT'} // '$$ROOT' means the entire document up to this stage
+    //         }
+    //     },
+    //     // add new fields
+    //     { $addFields: {
+    //         rating: 'highest', 
+    //         timestamp: {
+    //             $dateToString: {
+    //                 format: "%Y-%m-%dT%H:%M:%S", 
+    //                 date: new Date() }
+    //             }
+    //         }
+    //     },
+    //     { $project: { _id:0 } } // exclude the null _id
+    // ])
+        
+    // db.getCollection("reviews2").aggregate([
+    //     // Sort reviews by rating in asc order (lowest first)
+    //     { $sort: {rating: 1} },
+    //     // join with 'games' collection
+    //     { $lookup: { from: 'games', localField: 'ID', foreignField: 'gid', as: 'games' } },
+    //     // flatten the 'games' array (Since each review only got 1 matching game)
+    //     { $unwind: '$games'},
+    //     // group by 'ID' and keep only the highest rating (prevents duplicate highest ratings)
+    //     { $group: { 
+    //         _id: '$ID',
+    //         name: { $first: '$name' }, 
+    //         rating: { $first: '$rating' }, 
+    //         user: { $first: '$user' }, 
+    //         comment: { $first: '$comment' },
+    //         review_id: { $first: '$_id'},
+    //         } 
+    //     }
+    // ])
+
+
+
 }
