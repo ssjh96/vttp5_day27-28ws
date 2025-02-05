@@ -5,6 +5,7 @@ import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Date;
+import java.util.List;
 import java.util.Optional;
 
 import org.bson.Document;
@@ -13,7 +14,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.MultiValueMap;
 
 import jakarta.json.Json;
+import jakarta.json.JsonArrayBuilder;
 import jakarta.json.JsonObject;
+import jakarta.json.JsonObjectBuilder;
 import jakarta.json.JsonReader;
 import vttp5.paf.day27_28ws.repositories.GamesRepo;
 import vttp5.paf.day27_28ws.repositories.ReviewsRepo;
@@ -148,7 +151,7 @@ public class ReviewService
         return jSuccess;
     }
 
-    
+
 
     public JsonObject getLatestComment (String reviewId)
     {
@@ -200,6 +203,145 @@ public class ReviewService
                                 .add("edited", edited)
                                 .add("timestamp", timestamp)
                                 .build();
+
+        return jResult;
+    }
+
+
+    public JsonObject getReviewHistory1 (String reviewId)
+    {
+        // Search for review by given review oid
+        Optional<Document> optReviewDoc = reviewsRepo.findReviewById(reviewId);
+        if (optReviewDoc.isEmpty())
+        {
+            JsonObject jError = Json.createObjectBuilder()
+                                    .add("error", "No review found for oid: %s".formatted(reviewId))
+                                    .build();
+            
+            return jError;
+        }
+
+
+        Document reviewDoc = optReviewDoc.get();
+        System.out.println(">>>>> Latest: " + reviewDoc);
+
+        // {
+        //     user: <name form field>,
+        //     rating: <latest rating>,
+        //     comment: <latest comment>,
+        //     ID: <game id form field>,
+        //     posted: <date>,
+        //     name: <The board game’s name as per ID>,
+        //     edited: [
+        //     { comment: ..., rating: ..., posted: ... },
+        //     { comment: ..., rating: ..., posted: ... },
+        //     { comment: ..., rating: ..., posted: ... }
+        //     ],
+        //     timestamp: <result timestamp>
+        // }
+
+        // Extract attributes from review Doc
+        String user = reviewDoc.getString("user");
+        Double rating = reviewDoc.getDouble("rating");
+        String comment = reviewDoc.getString("comment");
+        int ID = reviewDoc.getInteger("ID");
+        String posted = reviewDoc.getString("posted");
+        String name = reviewDoc.getString("name");
+        // List<Document> editedList = reviewDoc.getList("edited", Document.class); // this is to get List<Documents since edited is an array of bson objects
+        // it allows iteration over the list or get specific elements, e.g. Document lastestEdit = editedList.get(editedList.size() - 1); // last element
+        String timestamp = LocalDateTime.now().toString();
+
+        // Check if the review was edited
+        Boolean bEdited = reviewDoc.containsKey("edited");
+
+        // if edit history is present
+        if(bEdited)
+        {
+            JsonArrayBuilder jab = Json.createArrayBuilder();
+            
+            List<Document> editedList = reviewDoc.getList("edited", Document.class);
+            for (Document edit : editedList)
+            {
+                JsonObject jEdit = Json.createObjectBuilder()
+                                        .add("rating", edit.getDouble("rating"))
+                                        .add("comment", edit.getString("comment"))
+                                        .add("posted", edit.getString("posted"))
+                                        .build();
+                
+                jab.add(jEdit);
+            }
+            
+            // Create jsonResult for edited
+            JsonObject jResult = Json.createObjectBuilder()
+                    .add("user", user)
+                    .add("rating", rating)
+                    .add("comment", comment)
+                    .add("ID", ID)
+                    .add("posted", posted)
+                    .add("name", name)
+                    .add("edited", jab.build())
+                    .add("timestamp", timestamp)
+                    .build();
+
+            return jResult;
+        }
+
+        // Create jsonResult for unedited
+        JsonObject jResult = Json.createObjectBuilder()
+                .add("user", user)
+                .add("rating", rating)
+                .add("comment", comment)
+                .add("ID", ID)
+                .add("posted", posted)
+                .add("name", name)
+                .add("edited", "no edits")
+                .add("timestamp", timestamp)
+                .build();
+
+        return jResult;
+    }
+
+    
+
+    public JsonObject getReviewHistory2 (String reviewId)
+    {
+        // Search for review by given review oid
+        Optional<Document> optReviewDoc = reviewsRepo.findReviewById(reviewId);
+        if (optReviewDoc.isEmpty())
+        {
+            JsonObject jError = Json.createObjectBuilder()
+                                    .add("error", "No review found for oid: %s".formatted(reviewId))
+                                    .build();
+            
+            return jError;
+        }
+
+        Document reviewDoc = optReviewDoc.get();
+        System.out.println(">>>>> Latest: " + reviewDoc);
+
+        // Remove "_id" to match expected JSON format
+        reviewDoc.remove("_id");
+        System.out.println(">>>>> After reviewDoc remove _id: " + reviewDoc);
+
+        // Check if the review was edited then return the result
+        Boolean bEdited = reviewDoc.containsKey("edited");
+        String jResultStr; 
+
+        if(!bEdited)
+        {
+            // Append necessary info and return jResultStr
+            jResultStr = reviewDoc
+                .append("edited", "no edits")
+                .append("timestamp", LocalDateTime.now().toString())
+                .toJson();
+        }
+
+        jResultStr = reviewDoc
+                    .append("timestamp", LocalDateTime.now().toString())
+                    .toJson();
+
+        JsonReader jReader = Json.createReader(new StringReader(jResultStr));
+        JsonObject jResult = jReader.readObject();
 
         return jResult;
     }

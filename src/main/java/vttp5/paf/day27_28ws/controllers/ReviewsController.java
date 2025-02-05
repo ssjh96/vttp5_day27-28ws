@@ -35,8 +35,9 @@ public class ReviewsController
     @PostMapping(path = "/review", consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<String> postReview(@RequestBody MultiValueMap<String, String> reviewData) // name, rating, comment (optional), game id
     {
-        System.out.println(reviewData);
+        System.out.println(">>>>> reviewData: " + reviewData);
         JsonObject jResult = reviewService.createReview(reviewData);
+        System.out.println(">>>>> jResult: " + jResult);
 
         if (jResult.containsKey("error"))
         {
@@ -55,8 +56,9 @@ public class ReviewsController
     @PutMapping(path = "review/{review_id}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<String> updateReview(@PathVariable ("review_id") String reviewId, @RequestBody String jUpdateStr) 
     {
-        System.out.println(jUpdateStr);
+        System.out.println(">>>>> jUpdateStr: " + jUpdateStr);
         JsonObject jResult = reviewService.updateReview(reviewId, jUpdateStr);
+        System.out.println(">>>>> jResult: " + jResult);
 
         if (jResult.containsKey("error"))
         {
@@ -71,6 +73,7 @@ public class ReviewsController
     public ResponseEntity<String> getLatestReview(@PathVariable ("review_id") String reviewId) {
         
         JsonObject jResult = reviewService.getLatestComment(reviewId);
+        System.out.println(">>>>> jResult: " + jResult);
 
         if (jResult.containsKey("error"))
         {
@@ -80,5 +83,18 @@ public class ReviewsController
         return ResponseEntity.ok(jResult.toString());
     }
     
-    
+
+    @GetMapping(path = "/review/{review_id}/history", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<String> getReviewHistory(@PathVariable ("review_id") String reviewId) {
+        
+        JsonObject jResult = reviewService.getReviewHistory2(reviewId);
+        System.out.println(">>>>> jResult: " + jResult);
+
+        if (jResult.containsKey("error"))
+        {
+            return ResponseEntity.badRequest().body(jResult.toString());
+        }
+
+        return ResponseEntity.ok(jResult.toString());
+    }
 }
