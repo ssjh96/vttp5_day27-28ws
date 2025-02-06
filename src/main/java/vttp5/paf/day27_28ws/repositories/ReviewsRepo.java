@@ -1,12 +1,21 @@
 package vttp5.paf.day27_28ws.repositories;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.bson.Document;
 import org.bson.json.JsonObject;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.aggregation.Aggregation;
+import org.springframework.data.mongodb.core.aggregation.AggregationResults;
+import org.springframework.data.mongodb.core.aggregation.ConvertOperators;
+import org.springframework.data.mongodb.core.aggregation.GroupOperation;
+import org.springframework.data.mongodb.core.aggregation.LookupOperation;
+import org.springframework.data.mongodb.core.aggregation.SortOperation;
+import org.springframework.data.mongodb.core.aggregation.UnwindOperation;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
@@ -21,6 +30,7 @@ public class ReviewsRepo {
     private MongoTemplate template;
 
     public static final String C_Reviews = "reviews2";
+    public static final String C_Games = "games";
     public static final String F_OID_Reviews = "_id";
     
     // db.reviews2.insert({
@@ -79,6 +89,8 @@ public class ReviewsRepo {
 
         return updateResult.getModifiedCount();
     }
+
+    
 
     
 

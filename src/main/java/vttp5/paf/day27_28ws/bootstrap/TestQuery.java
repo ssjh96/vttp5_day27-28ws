@@ -11,6 +11,7 @@ import org.springframework.stereotype.Component;
 
 import vttp5.paf.day27_28ws.repositories.GamesRepo;
 import vttp5.paf.day27_28ws.repositories.ReviewsRepo;
+import vttp5.paf.day27_28ws.services.GamesService;
 
 @Component
 public class TestQuery implements CommandLineRunner 
@@ -20,6 +21,9 @@ public class TestQuery implements CommandLineRunner
 
     @Autowired 
     private ReviewsRepo reviewsRepo;
+
+    @Autowired
+    private GamesService gamesService;
 
     @Override
     public void run(String... args) throws Exception {
@@ -55,13 +59,33 @@ public class TestQuery implements CommandLineRunner
         System.out.println(">>>>> " + review.toJson());
 
 
-        //
+        // test array
         List<String> test = Arrays.asList("hello" + "kan wo", "ni zai" + "hai pai semo");
         System.out.println(">>> test: \n\n" + test);
 
+        // WS28 Part a - test getting reviews by gid 
         Document testGameReviews = gamesRepo.getGameReviewsByGid(1);
         System.out.println(">>> Test game reviews when gid=1: \n\n" + testGameReviews);
         System.out.println(">>> Test game reviews (JSON) when gid=1: \n\n" + testGameReviews.toJson());
+
+        // WS28 Part b-1 - test getting highest
+        List<Document> listEachHighestRatingDocs = gamesRepo.getHighestRatingInEachGame();
+
+        for(Document d : listEachHighestRatingDocs)
+        {
+            System.out.println(">>> each highest rating: \n" + d);
+        }
+
+        // WS28 Part b-2 - test getting lowest
+        List<Document> listEachLowestRatingDocs = gamesRepo.getLowestRatingInEachGame();
+
+        for(Document d : listEachLowestRatingDocs)
+        {
+            System.out.println(">>> each lowest rating: \n" + d);
+        }
+
+        // test highest rating service
+        // System.out.println(gamesService.getHighestRatingInfos());
     }
     
 }
