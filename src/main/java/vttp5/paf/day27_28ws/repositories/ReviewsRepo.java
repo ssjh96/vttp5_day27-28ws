@@ -81,4 +81,85 @@ public class ReviewsRepo {
     }
 
     
+
+
+    // // part b
+    // db.getCollection("reviews2").aggregate([
+    //     // Sort reviews by rating in dsc order (highest first)
+    //     { $sort: {rating: -1} },
+    //     // join with 'games' collection
+    //     { $lookup: { from: 'games', localField: 'ID', foreignField: 'gid', as: 'games' } },
+    //     // flatten the 'games' array (Since each review only got 1 matching game)
+    //     { $unwind: '$games'},
+    //     // group by 'ID' and keep only the highest rating (prevents duplicate highest ratings)
+    //     { $group: { 
+    //         _id: '$ID',
+    //         name: { $first: '$name' }, 
+    //         rating: { $first: '$rating' }, 
+    //         user: { $first: '$user' }, 
+    //         comment: { $first: '$comment' },
+    //         review_id: { $first: '$_id'}
+    //         } 
+    //     }  
+    // ])
+
+    // db.getCollection("reviews2").aggregate([
+    //     // Sort reviews by rating in dsc order (highest first)
+    //     { $sort: {rating: -1} },
+    //     // join with 'games' collection
+    //     { $lookup: { from: 'games', localField: 'ID', foreignField: 'gid', as: 'games' } },
+    //     // flatten the 'games' array (Since each review only got 1 matching game)
+    //     { $unwind: '$games'},
+    //     // group by 'ID' and keep only the highest rating (prevents duplicate highest ratings)
+    //     { $group: { 
+    //         _id: '$ID',
+    //         name: { $first: '$name' }, 
+    //         rating: { $first: '$rating' }, 
+    //         user: { $first: '$user' }, 
+    //         comment: { $first: '$comment' },
+    //         review_id: { $first: '$_id'}
+    //         } 
+    //     },
+    //     // Group all selected games into a single array
+    //     // group requires _id to be set
+    //     // _id: null since we dont need a group identifier
+    //     { $group: {
+    //         _id: null, // no grouping key, just collect all results
+    //         games: {$push: '$$ROOT'} // '$$ROOT' means the entire document up to this stage
+    //         }
+    //     },
+    //     // add new fields
+    //     { $addFields: {
+    //         rating: 'highest', 
+    //         timestamp: {
+    //             $dateToString: {
+    //                 format: "%Y-%m-%dT%H:%M:%S", 
+    //                 date: new Date() }
+    //             }
+    //         }
+    //     },
+    //     { $project: { _id:0 } } // exclude the null _id
+    // ])
+        
+    // db.getCollection("reviews2").aggregate([
+    //     // Sort reviews by rating in asc order (lowest first)
+    //     { $sort: {rating: 1} },
+    //     // join with 'games' collection
+    //     { $lookup: { from: 'games', localField: 'ID', foreignField: 'gid', as: 'games' } },
+    //     // flatten the 'games' array (Since each review only got 1 matching game)
+    //     { $unwind: '$games'},
+    //     // group by 'ID' and keep only the highest rating (prevents duplicate highest ratings)
+    //     { $group: { 
+    //         _id: '$ID',
+    //         name: { $first: '$name' }, 
+    //         rating: { $first: '$rating' }, 
+    //         user: { $first: '$user' }, 
+    //         comment: { $first: '$comment' },
+    //         review_id: { $first: '$_id'},
+    //         } 
+    //     }
+    // ])
+
+
+    
 }
